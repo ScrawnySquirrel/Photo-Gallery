@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     String currentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
 
-    private static final int SEARCH_REQUEST = 1;
+    private static final int SEARCH_REQUEST = 2;
 
     private String searchInput, startDate, endDate;
 
