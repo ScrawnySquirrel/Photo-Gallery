@@ -74,13 +74,13 @@
         app:layout_constraintStart_toEndOf="@+id/imageView" />
 
     <Button
-        android:id="@+id/buttonSnap"
+        android:id="@+id/btn_Camera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="161dp"
         android:layout_marginLeft="161dp"
         android:layout_marginBottom="35dp"
-        android:text="Snap"
+        android:text="Take Photo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
