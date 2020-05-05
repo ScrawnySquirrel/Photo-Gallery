@@ -2,10 +2,14 @@ package com.example.photogallery;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -16,22 +20,34 @@ import java.util.Date;
 
 public class SearchActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener{
 
+    private EditText searchInput;
     private TextView startDate;
     private TextView endDate;
+    private Button btnStartDate;
+    private Button btnEndDate;
+    private Button btnSearch;
 
-    private static int START_DATE_FLAG = 0;
-    private static int END_DATE_FLAG = 1;
+    private String strStartDate;
+    private String strEndDate;
 
-    private int dateFlag = -1;
+    private static int START_DATE_FLAG = 1;
+    private static int END_DATE_FLAG = 2;
+
+    private int dateFlag = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        startDate = findViewById(R.id.textStartDate);
-        endDate = findViewById(R.id.textEndDate);
 
-        findViewById(R.id.btnStartDate).setOnClickListener(new View.OnClickListener() {
+        searchInput = findViewById(R.id.etSearch);
+        startDate = findViewById(R.id.tvStartDate);
+        endDate = findViewById(R.id.tvEndDate);
+        btnStartDate = findViewById(R.id.btnStartDate);
+        btnEndDate = findViewById(R.id.btnEndDate);
+        btnSearch = findViewById(R.id.btnSearch);
+
+        btnStartDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dateFlag = START_DATE_FLAG;
@@ -39,11 +55,24 @@ public class SearchActivity extends AppCompatActivity implements DatePickerDialo
             }
         });
 
-        findViewById(R.id.btnEndDate).setOnClickListener(new View.OnClickListener() {
+        btnEndDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dateFlag = END_DATE_FLAG;
                 showDateDialog();
+            }
+        });
+
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent resultIntent  = new Intent(SearchActivity.this, MainActivity.class)
+                    .putExtra("searchInput", searchInput.getText().toString())
+                    .putExtra("startDate", strStartDate)
+                    .putExtra("endDate", strEndDate);
+
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
             }
         });
     }
@@ -71,9 +100,11 @@ public class SearchActivity extends AppCompatActivity implements DatePickerDialo
             SimpleDateFormat fmtOut = new SimpleDateFormat("d MMM, yyyy");
 
             if(dateFlag == START_DATE_FLAG) {
-                startDate.setText(fmtOut.format(date));
+                strStartDate = fmtOut.format(date);
+                startDate.setText(strStartDate);
             }else {
-                endDate.setText(fmtOut.format(date));
+                strEndDate = fmtOut.format(date);
+                endDate.setText(strEndDate);
             }
         } catch (ParseException e) {
             e.printStackTrace();

@@ -15,7 +15,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/searchInput" />
+        app:layout_constraintTop_toBottomOf="@id/etSearch" />
 
     <Button
         android:id="@+id/btnEndDate"
@@ -26,7 +26,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textStartDate" />
+        app:layout_constraintTop_toBottomOf="@id/tvStartDate" />
 
     <Button
         android:id="@+id/btnSearch"
@@ -37,10 +37,10 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="100dp"
-        app:layout_constraintTop_toBottomOf="@id/textEndDate"/>
+        app:layout_constraintTop_toBottomOf="@id/tvEndDate"/>
 
     <EditText
-        android:id="@+id/searchInput"
+        android:id="@+id/etSearch"
         android:inputType="text"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
@@ -53,7 +53,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textEndDate"
+        android:id="@+id/tvEndDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -65,7 +65,7 @@
         app:layout_constraintTop_toBottomOf="@id/btnEndDate" />
 
     <TextView
-        android:id="@+id/textStartDate"
+        android:id="@+id/tvStartDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
