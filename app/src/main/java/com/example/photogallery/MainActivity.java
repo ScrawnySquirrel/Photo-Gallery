@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     String currentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
-
+    private ArrayList<String> imagePaths;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         String currentPhotoPath;
 
         //get the list of images paths
-        ArrayList<String> imagePaths = new ArrayList<>();
+        imagePaths = new ArrayList<>();
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File[] images = storageDir.listFiles();
         for (File image : images)
