@@ -18,7 +18,9 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static android.net.Uri.fromFile;
 
@@ -27,14 +29,37 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     String currentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
-
+    private ArrayList<String> imagePaths;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         String currentPhotoPath;
 
+        //get the list of images paths
+        imagePaths = new ArrayList<>();
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File[] images = storageDir.listFiles();
+        for (File image : images)
+        {
+            String imagePath = image.getPath();
+            imagePaths.add(imagePath);
+        }
+
+      //  FileProvider.fi
         mImageView = findViewById(R.id.imageView);
+        if(!imagePaths.isEmpty())
+        {
+            String path = imagePaths.get(0);
+            File image = new File(path);
+            mImageView.setImageURI(Uri.fromFile(image));
+
+            //using bitmap, not working for some reason, myBitmap == null
+            //Bitmap myBitmap = BitmapFactory.decodeFile(path);
+             // mImageView.setImageBitmap(myBitmap);
+        }
+
+
         findViewById(R.id.btn_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
