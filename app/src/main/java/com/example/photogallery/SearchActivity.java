@@ -96,14 +96,19 @@ public class SearchActivity extends AppCompatActivity implements DatePickerDialo
         try {
             Date date = formatter.parse(dateStr);
 
-            SimpleDateFormat fmtOut = new SimpleDateFormat("d MMM, yyyy");
+            SimpleDateFormat fmtOutDisplay = new SimpleDateFormat("d MMM, yyyy");
+            SimpleDateFormat fmtOutFilePath = new SimpleDateFormat("yyyyMMdd");
 
             if(dateFlag == START_DATE_FLAG) {
-                strStartDate = fmtOut.format(date);
+                strStartDate = fmtOutDisplay.format(date);
                 startDate.setText(strStartDate);
+
+                strStartDate = fmtOutFilePath.format(date);
             }else {
-                strEndDate = fmtOut.format(date);
+                strEndDate = fmtOutDisplay.format(date);
                 endDate.setText(strEndDate);
+
+                strEndDate = fmtOutFilePath.format(date);
             }
         } catch (ParseException e) {
             e.printStackTrace();

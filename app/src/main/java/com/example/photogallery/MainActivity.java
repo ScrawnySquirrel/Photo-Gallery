@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> imagePaths;
     private String searchInput, startDate, endDate;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
                 searchPhoto();
             }
         });
-
-        String currentPhotoPath;
 
         //get the list of images paths
         imagePaths = new ArrayList<>();
@@ -114,12 +112,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             setPic();
         }else if(resultCode == RESULT_OK && requestCode == SEARCH_REQUEST) {
-            searchInput = data.getStringExtra("searchInput");
+            searchInput = data.getStringExtra("searchInput").trim();
             startDate = data.getStringExtra("startDate");
             endDate = data.getStringExtra("endDate");
 
-            String searchResult = searchInput +" " + startDate + " " + endDate;
-            // TODO: search the folder where all photos are stored and display the first matched photo
+            searchPhoto(searchInput, startDate, endDate);
         }
     }
 
@@ -170,4 +167,57 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
         mImageView.setImageBitmap(bitmap);
     }
+
+    private void searchPhoto(String searchInput, String startDate, String endDate) {
+        ArrayList<String> results = new ArrayList<>();
+
+        if (searchInput != null){
+            results = searchPhotoByCaption(searchInput);
+        }else if (startDate != null || endDate != null){
+            results = searchPhotoByDate(startDate, endDate);
+        }
+
+        if (!results.isEmpty()){
+            currentPhotoPath = results.get(0);
+            setPic();
+        }
+    }
+
+    private ArrayList<String> searchPhotoByCaption(String searchInput){
+        ArrayList<String> results = new ArrayList<>();
+
+        for (String file : imagePaths) {
+            if(file.contains(searchInput)){
+                results.add(file);
+            }
+        }
+
+        return results;
+    }
+
+    private ArrayList<String> searchPhotoByDate(String startDate, String endDate){
+        ArrayList<String> results = new ArrayList<>();
+        ArrayList<String> imageDates = new ArrayList<>();
+
+        Collections.sort(imagePaths);
+
+        for (String path : imagePaths) {
+            imageDates.add(path.substring(5, 13));
+        }
+
+        int firstIndex = imageDates.indexOf(startDate);
+        int lastIndex = imageDates.lastIndexOf(endDate);
+
+        if(firstIndex != -1 && lastIndex != -1){
+            // TODO: need to add more scenarios
+            if(lastIndex >= firstIndex){
+                for(int i = firstIndex; i <= lastIndex; i++){
+                    results.add(imagePaths.get(i));
+                }
+            }
+        }
+
+        return results;
+    }
+
 }
