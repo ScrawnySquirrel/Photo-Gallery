@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int SEARCH_REQUEST = 2;
 
     private ImageView mImageView;
+    private TextView tvTimestamp;
     private ArrayList<String> imagePaths;
     private String searchInput, startDate, endDate;
 
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        tvTimestamp = findViewById(R.id.textViewTimeStamp);
 
         Button btnGoToSearch = findViewById(R.id.buttonSearch);
         btnGoToSearch.setOnClickListener(new View.OnClickListener() {
@@ -166,12 +170,20 @@ public class MainActivity extends AppCompatActivity {
 
         Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
         mImageView.setImageBitmap(bitmap);
+
+        tvTimestamp.setText(getPhotoTimestamp(currentPhotoPath));
     }
 
+    private String getPhotoTimestamp(String photoPath){
+        String[] photoInfo = photoPath.split("/");
+        return photoInfo[9].substring(5, 13);
+    }
+
+    // TODO: search function should be moved to separate class in a separate package (task 10)
     private void searchPhoto(String searchInput, String startDate, String endDate) {
         ArrayList<String> results = new ArrayList<>();
 
-        if (searchInput != null){
+        if (!searchInput.isEmpty()){
             results = searchPhotoByCaption(searchInput);
         }else if (startDate != null || endDate != null){
             results = searchPhotoByDate(startDate, endDate);
@@ -202,11 +214,15 @@ public class MainActivity extends AppCompatActivity {
         Collections.sort(imagePaths);
 
         for (String path : imagePaths) {
-            imageDates.add(path.substring(5, 13));
+            imageDates.add(getPhotoTimestamp(path));
         }
 
         int firstIndex = imageDates.indexOf(startDate);
         int lastIndex = imageDates.lastIndexOf(endDate);
+
+        if (firstIndex != -1 && lastIndex == -1){
+            results.add(imagePaths.get(firstIndex));
+        }
 
         if(firstIndex != -1 && lastIndex != -1){
             // TODO: need to add more scenarios
@@ -219,5 +235,4 @@ public class MainActivity extends AppCompatActivity {
 
         return results;
     }
-
 }
