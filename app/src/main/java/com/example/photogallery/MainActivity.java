@@ -13,13 +13,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.photogallery.search.SearchPhoto;
+
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -120,7 +124,15 @@ public class MainActivity extends AppCompatActivity {
             startDate = data.getStringExtra("startDate");
             endDate = data.getStringExtra("endDate");
 
-            searchPhoto(searchInput, startDate, endDate);
+            String result = SearchPhoto.search(imagePaths, searchInput, startDate, endDate);
+
+            if(result != null){
+                currentPhotoPath = result;
+            }else{
+                currentPhotoPath = imagePaths.get(0);
+            }
+
+            setPic();
         }
     }
 
@@ -171,68 +183,40 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
         mImageView.setImageBitmap(bitmap);
 
-        tvTimestamp.setText(getPhotoTimestamp(currentPhotoPath));
+        tvTimestamp.setText(getPhotoFullTimestamp(currentPhotoPath));
     }
 
-    private String getPhotoTimestamp(String photoPath){
-        String[] photoInfo = photoPath.split("/");
-        return photoInfo[9].substring(5, 13);
+    public static String getPhotoDate(String photoPath){
+        String[] fileNameElements = getFileName(photoPath).split("_");
+//        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String timestamp = fileNameElements[1];
+        return timestamp;
     }
 
-    // TODO: search function should be moved to separate class in a separate package (task 10)
-    private void searchPhoto(String searchInput, String startDate, String endDate) {
-        ArrayList<String> results = new ArrayList<>();
+    public static String getPhotoFullTimestamp(String photoPath){
+        String[] fileNameElements = getFileName(photoPath).split("_");
+        String timestampStr = fileNameElements[1] + fileNameElements[2];
+        String formattedTime;
 
-        if (!searchInput.isEmpty()){
-            results = searchPhotoByCaption(searchInput);
-        }else if (startDate != null || endDate != null){
-            results = searchPhotoByDate(startDate, endDate);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        Date timestamp;
+
+        try {
+            timestamp = formatter.parse(timestampStr);
+
+            SimpleDateFormat fmtOut = new SimpleDateFormat(("d MMM, yyyy, HH:mm:ss"));
+            formattedTime = fmtOut.format(timestamp);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
-        if (!results.isEmpty()){
-            currentPhotoPath = results.get(0);
-            setPic();
-        }
+        return formattedTime;
     }
 
-    private ArrayList<String> searchPhotoByCaption(String searchInput){
-        ArrayList<String> results = new ArrayList<>();
-
-        for (String file : imagePaths) {
-            if(file.contains(searchInput)){
-                results.add(file);
-            }
-        }
-
-        return results;
-    }
-
-    private ArrayList<String> searchPhotoByDate(String startDate, String endDate){
-        ArrayList<String> results = new ArrayList<>();
-        ArrayList<String> imageDates = new ArrayList<>();
-
-        Collections.sort(imagePaths);
-
-        for (String path : imagePaths) {
-            imageDates.add(getPhotoTimestamp(path));
-        }
-
-        int firstIndex = imageDates.indexOf(startDate);
-        int lastIndex = imageDates.lastIndexOf(endDate);
-
-        if (firstIndex != -1 && lastIndex == -1){
-            results.add(imagePaths.get(firstIndex));
-        }
-
-        if(firstIndex != -1 && lastIndex != -1){
-            // TODO: need to add more scenarios
-            if(lastIndex >= firstIndex){
-                for(int i = firstIndex; i <= lastIndex; i++){
-                    results.add(imagePaths.get(i));
-                }
-            }
-        }
-
-        return results;
+    public static String getFileName(String photoPath){
+        int startIndex = photoPath.lastIndexOf("/") + 1;
+        return photoPath.substring(startIndex);
     }
 }
