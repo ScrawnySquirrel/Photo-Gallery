@@ -3,4 +3,5 @@
     <string name="start_date">Start Date</string>
     <string name="end_date">End Date</string>
     <string name="search">Search</string>
+    <string name="send_to">Share to</string>
 </resources>

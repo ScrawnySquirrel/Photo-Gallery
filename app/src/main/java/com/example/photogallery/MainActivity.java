@@ -6,6 +6,7 @@ import androidx.core.content.FileProvider;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -53,6 +54,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button shareBtn = findViewById(R.id.btn_Share);
+        shareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                share(currentPhotoPath);
+            }
+        });
+
         //get the list of images paths
         imagePaths = new ArrayList<>();
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -68,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         if(!imagePaths.isEmpty())
         {
             String path = imagePaths.get(0);
-            setPic(path);
+            //setPic(path);
         }
 
         findViewById(R.id.btn_camera).setOnClickListener(new View.OnClickListener() {
@@ -84,10 +93,13 @@ public class MainActivity extends AppCompatActivity {
         int buttonId = v.getId();
         if(buttonId== R.id.buttonLeft && index > 0) index--;
         else if (buttonId == R.id.buttonRight &&
-            index < imagePaths.size())
+                index < imagePaths.size())
             index++;
         setPic(imagePaths.get(index));
+        tvTimestamp.setText(getPhotoFullTimestamp(imagePaths.get(index)));
+        getGeoLocation(imagePaths.get(index));
     }
+
     private void searchPhoto(){
         Intent intent = new Intent(MainActivity.this, SearchActivity.class);
         startActivityForResult(intent, SEARCH_REQUEST);
@@ -148,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
         return image;
@@ -170,16 +181,14 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
-             bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+            bitmap = BitmapFactory.decodeFile(currentPhotoPath);
         }
         mImageView.setImageBitmap(bitmap);
-
         tvTimestamp.setText(getPhotoFullTimestamp(currentPhotoPath));
     }
 
     public static String getPhotoDate(String photoPath){
         String[] fileNameElements = getFileName(photoPath).split("_");
-//        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String timestamp = fileNameElements[1];
         return timestamp;
     }
@@ -209,5 +218,27 @@ public class MainActivity extends AppCompatActivity {
     public static String getFileName(String photoPath){
         int startIndex = photoPath.lastIndexOf("/") + 1;
         return photoPath.substring(startIndex);
+    }
+
+    private void getGeoLocation(String photoPath){
+        try {
+            ExifInterface exif = new ExifInterface(photoPath);
+            String lat = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
+            String lng = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
+
+            TextView tvLocation = findViewById(R.id.tvLocation);
+            tvLocation.setText(lat + " " + lng);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void share(String uriToImage){
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
+        shareIntent.setType("image/jpeg");
+        startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
     }
 }
