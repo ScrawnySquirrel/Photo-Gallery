@@ -1,5 +1,8 @@
 package com.example.photogallery;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,24 +23,19 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
 public class MainActivity extends AppCompatActivity {
-
+    private ImageView mImageView;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     String currentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final int SEARCH_REQUEST = 2;
 
-    private ImageView mImageView;
     private TextView tvTimestamp;
     private ArrayList<String> imagePaths;
+    private int index = 0;
+
     private String searchInput, startDate, endDate;
 
     @Override
@@ -61,21 +59,16 @@ public class MainActivity extends AppCompatActivity {
         File[] images = storageDir.listFiles();
         for (File image : images)
         {
-            String imagePath = image.getPath();
+            String imagePath = image.getAbsolutePath();
             imagePaths.add(imagePath);
         }
 
       //  FileProvider.fi
-        mImageView = findViewById(R.id.imageView);
+        mImageView = (ImageView)findViewById(R.id.imageView);
         if(!imagePaths.isEmpty())
         {
             String path = imagePaths.get(0);
-            File image = new File(path);
-            mImageView.setImageURI(Uri.fromFile(image));
-
-            //using bitmap, not working for some reason, myBitmap == null
-            //Bitmap myBitmap = BitmapFactory.decodeFile(path);
-            // mImageView.setImageBitmap(myBitmap);
+            setPic(path);
         }
 
         findViewById(R.id.btn_camera).setOnClickListener(new View.OnClickListener() {
@@ -86,6 +79,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void ScrollPhotos(View v)
+    {
+        int buttonId = v.getId();
+        if(buttonId== R.id.buttonLeft && index > 0) index--;
+        else if (buttonId == R.id.buttonRight &&
+            index < imagePaths.size())
+            index++;
+        setPic(imagePaths.get(index));
+    }
     private void searchPhoto(){
         Intent intent = new Intent(MainActivity.this, SearchActivity.class);
         startActivityForResult(intent, SEARCH_REQUEST);
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            setPic();
+            setPic(currentPhotoPath);
         }else if(resultCode == RESULT_OK && requestCode == SEARCH_REQUEST) {
             searchInput = data.getStringExtra("searchInput").trim();
             startDate = data.getStringExtra("startDate");
@@ -132,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 currentPhotoPath = imagePaths.get(0);
             }
 
-            setPic();
+            setPic(currentPhotoPath);
         }
     }
 
@@ -160,27 +162,16 @@ public class MainActivity extends AppCompatActivity {
         this.sendBroadcast(mediaScanIntent);
     }
 
-    private void setPic() {
-        // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+    private void setPic(String path) {
+        Bitmap bitmap;
+        if(path != null)
+        {
+            bitmap = BitmapFactory.decodeFile(path);
+        }
+        else
+        {
+             bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+        }
         mImageView.setImageBitmap(bitmap);
 
         tvTimestamp.setText(getPhotoFullTimestamp(currentPhotoPath));
