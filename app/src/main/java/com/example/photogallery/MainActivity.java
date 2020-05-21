@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     String currentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
     private ArrayList<String> imagePaths;
+    private int index = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,23 +44,17 @@ public class MainActivity extends AppCompatActivity {
         File[] images = storageDir.listFiles();
         for (File image : images)
         {
-            String imagePath = image.getPath();
+            String imagePath = image.getAbsolutePath();
             imagePaths.add(imagePath);
         }
 
       //  FileProvider.fi
-        mImageView = findViewById(R.id.imageView);
+        mImageView = (ImageView)findViewById(R.id.imageView);
         if(!imagePaths.isEmpty())
         {
             String path = imagePaths.get(0);
-            File image = new File(path);
-            mImageView.setImageURI(Uri.fromFile(image));
-
-            //using bitmap, not working for some reason, myBitmap == null
-            //Bitmap myBitmap = BitmapFactory.decodeFile(path);
-             // mImageView.setImageBitmap(myBitmap);
+            setPic(path);
         }
-
 
         findViewById(R.id.btn_camera).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,6 +64,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void ScrollPhotos(View v)
+    {
+        int buttonId = v.getId();
+        if(buttonId== R.id.buttonLeft && index > 0) index--;
+        else if (buttonId == R.id.buttonRight &&
+            index < imagePaths.size())
+            index++;
+        setPic(imagePaths.get(index));
+    }
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -95,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            setPic();
+            setPic(currentPhotoPath);
         }
     }
 
@@ -123,27 +128,16 @@ public class MainActivity extends AppCompatActivity {
         this.sendBroadcast(mediaScanIntent);
     }
 
-    private void setPic() {
-        // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+    private void setPic(String path) {
+        Bitmap bitmap;
+        if(path != null)
+        {
+            bitmap = BitmapFactory.decodeFile(path);
+        }
+        else
+        {
+             bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+        }
         mImageView.setImageBitmap(bitmap);
     }
 }
